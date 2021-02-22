@@ -9,11 +9,9 @@ header("Content-Type: application/json; charset=UTF-8");
 class UserController  extends User{
     private $requestMethod;
     private $userId;
-    private $currentUser;
-    public function __construct($requestMethod,$userId=null,$currentUser=null) {
+    public function __construct($requestMethod,$userId=null) {
         $this->requestMethod = $requestMethod;
         $this->userId=$userId;
-        $this->currentUser=$currentUser;
     }
 
     public function processRequest() {
@@ -35,7 +33,7 @@ class UserController  extends User{
                 $response = $this->deleteUser($this->userId);
                 break;
             default:
-                $response = $this->notFoundResponse();
+                $response = $this->createMessageToClient(422,"invalid command!","invalid command!");
                 break;
         }
         header($response['header']);
@@ -43,11 +41,13 @@ class UserController  extends User{
     }
 
     private function getAllUsers() {
-        if($this->currentUser->getType()=="Student"){
-            return $this->createMessageToClient(422,"invalid command!","invalid command!");
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student"){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         $result = User::findAll();
-        return $this->createMessageToClient(200,"ok","ok");
+        return $this->createMessageToClient(200,"ok",$result);
     }
 
 
@@ -62,7 +62,8 @@ class UserController  extends User{
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        return $this->createMessageToClient(200,"ok","ok");
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        return $this->createMessageToClient(200,"ok",$result);
     }
 
 
@@ -82,7 +83,7 @@ class UserController  extends User{
     private function updateUserFromRequest($id) {
         $result = User::findUser($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
         if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
@@ -108,8 +109,9 @@ class UserController  extends User{
         }
         $result = User::findUser($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         PatentController::deleteAllPatentOfUser($id);
         IdeaController::deleteAllIdeasOfUser($id);
         User::delete($id);
@@ -138,38 +140,6 @@ class UserController  extends User{
         }
 
         return true;
-    }
-
-    public function saveUserObjectInSession($userObj){ /// at the end of each page!!!!
-        if(session_status()==PHP_SESSION_NONE) {
-            session_start();
-        }
-        $_SESSION["userObj"]=serialize($userObj);
-        return session_id();
-    }
-
-    public function loadUserFromSession(){
-        if(session_status()==PHP_SESSION_NONE) {
-            session_start();
-        }
-        $userObj=unserialize($_SESSION["userObj"]);
-        return $userObj;
-    }
-
-
-    private function unprocessableEntityResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
-        return $response;
-    }
-
-    private function notFoundResponse() {
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
-        return $response;
     }
 
     private function createMessageToClient($httpCode,$headerMessage,$body){

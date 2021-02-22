@@ -54,6 +54,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -67,6 +68,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -88,7 +90,8 @@ class PatentController  extends Patent {
         if (! $this->validatePatentForInsertion($input)) {
             return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
-        Patent::insert($input);
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        Patent::insert($input,$decoded->data->user_id);
         return $this->createMessageToClient(200,"ok","ok");
     }
 
@@ -102,7 +105,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validatePatentForUpdate($input)) {
             return $this->createMessageToClient(422,"invalid command!","invalid command!");
@@ -127,6 +130,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         Patent::delete($id);
         return $this->createMessageToClient(200,"ok","ok");
     }
@@ -157,29 +161,10 @@ class PatentController  extends Patent {
         }
     }
 
-    private function unprocessableEntityResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
-        return $response;
-    }
-
-    private function notFoundResponse() {
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
-        return $response;
-    }
-
     private function createMessageToClient($httpCode,$headerMessage,$body){
         $response["header"]="HTTP/1.1 ".$httpCode." ".$headerMessage;
         $response["body"]=$body;
         return $response;
     }
-
-
-
-
 
 }

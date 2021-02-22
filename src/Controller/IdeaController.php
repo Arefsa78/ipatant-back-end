@@ -54,6 +54,7 @@ class IdeaController extends Idea {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -67,6 +68,7 @@ class IdeaController extends Idea {
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
          return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -88,7 +90,8 @@ class IdeaController extends Idea {
         if (! $this->validateIdeaForInsertion($input)) {
             return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
-        Idea::insert($input);
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        Idea::insert($input,$decoded->data->user_id);
         return $this->createMessageToClient(201,"ok","created!");
     }
 
@@ -102,6 +105,7 @@ class IdeaController extends Idea {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validateIdeaForUpdation($input)) {
             return $this->createMessageToClient(404,"not found!","not found!");
@@ -126,6 +130,7 @@ class IdeaController extends Idea {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
+        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         Idea::delete($id);
         return $this->createMessageToClient(200,"ok","ok");
     }

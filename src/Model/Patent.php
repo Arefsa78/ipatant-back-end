@@ -44,7 +44,7 @@ class Patent
         }
     }
 
-    protected static function insert(Array $input) {
+    protected static function insert(Array $input,$ownerId) {
 
         // insert a patent to databaseController
         $statement = "INSERT INTO PATENTS (patent_name, ownerId, patentStatus, description, extraResources)
@@ -54,7 +54,7 @@ class Patent
             $statement = $db->getConnection()->prepare($statement);
             $statement->execute(array(
                 'patent_name'=>$input['patent_name'],
-                'ownerId' => $input['ownerId'],
+                'ownerId' => $ownerId,
                 'patentStatus' => 'START',
                 'description' => $input['description'],
                 'extraResources' => $input['extraResources'],

@@ -44,7 +44,7 @@ class Idea
         }
     }
 
-    protected static function insert(Array $input) {
+    protected static function insert(Array $input,$ownerId) {
 
         // insert an idea to databaseController
         $statement = "INSERT INTO IDEAS (idea_name,ownerId,ideaStatus,description, extraResources)
@@ -54,7 +54,7 @@ class Idea
             $statement = $db->getConnection()->prepare($statement);
             $statement->execute(array(
                 'idea_name'=>$input['idea_name'],
-                'ownerId' => $input['ownerId'],
+                'ownerId' => $ownerId,
                 'ideaStatus' => 'START',
                 'description' => $input['description'],
                 'extraResources' => $input['extraResources'],

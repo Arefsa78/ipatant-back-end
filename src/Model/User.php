@@ -27,6 +27,10 @@ class User {
         return $this->type;
     }
 
+    public function getEnabled(){
+        return $this->enabled;
+    }
+
 
     protected static function findUser($id) {
         // find an specific id

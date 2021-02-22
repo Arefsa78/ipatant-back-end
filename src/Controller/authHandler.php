@@ -23,7 +23,7 @@ class authHandler
         $this->mode=$mode;
     }
 
-    public function requestProcess(){
+    public function processRequest(){
         $response=null;
         if(is_null($this->mode) && $this->requestMethod=="GET"){
             $response=$this->checkCorrectType();
@@ -43,7 +43,8 @@ class authHandler
             "expire"=>$expiration_time,
             "data"=>array(
                 "user_id"=>$user->getUserId(),
-                "type" =>$user->getType()
+                "type" =>$user->getType(),
+                "enable"=>$user->getEnabled()
             )
         );
         return JWT::encode($payload,keys);
@@ -57,7 +58,8 @@ class authHandler
             "expire"=>$expiration_time,
             "data"=>array(
                 "user_id"=>$user->getUserId(),
-                "type" =>$user->getType()
+                "type" =>$user->getType(),
+                "enable"=>$user->getEnabled()
             )
         );
         $id=JWT::encode($payload,refreshKey);
@@ -123,7 +125,8 @@ class authHandler
                 "expire"=>$expiration_time,
                 "data"=>array(
                     "user_id"=>$decoded->data->user_id,
-                    "type"=>$decoded->data->type
+                    "type"=>$decoded->data->type,
+                    "enable"=>$decoded->data->enable
                 )
             );
             return $this->createMessageToClient(200,"ok",JWT::encode($payload,keys));

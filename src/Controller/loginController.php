@@ -28,10 +28,9 @@ class loginController
                 $response = $this->notFoundResponse();
                 break;
         }
-        header($response['status_code_header']);
-        if($response['body']) {
-            echo $response['body'];
-        }
+        header($response['header']);
+        echo json_encode($response["body"],JSON_UNESCAPED_UNICODE );
+
     }
 
 //    private function login(){ //// login normal az tarighe safhe adi!
@@ -166,20 +165,6 @@ class loginController
 //        return $response;
 //    }
 
-//    private function unprocessableEntityResponse()
-//    {
-//        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-//        $response['body'] = json_encode([
-//            'error' => 'Invalid input'
-//        ]);
-//        return $response;
-//    }
-//
-//    private function notFoundResponse() {
-//        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-//        $response['body'] = null;
-//        return $response;
-//    }
     private function createMessageToClient($httpCode,$headerMessage,$body){
         $response["header"]="HTTP/1.1 ".$httpCode." ".$headerMessage;
         $response["body"]=$body;
