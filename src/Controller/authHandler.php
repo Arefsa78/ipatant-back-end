@@ -43,8 +43,7 @@ class authHandler
             "expire"=>$expiration_time,
             "data"=>array(
                 "user_id"=>$user->getUserId(),
-                "type" =>$user->getType(),
-                "enable"=>$user->getEnabled()
+                "type" =>$user->getType()
             )
         );
         return JWT::encode($payload,keys);
@@ -58,8 +57,7 @@ class authHandler
             "expire"=>$expiration_time,
             "data"=>array(
                 "user_id"=>$user->getUserId(),
-                "type" =>$user->getType(),
-                "enable"=>$user->getEnabled()
+                "type" =>$user->getType()
             )
         );
         $id=JWT::encode($payload,refreshKey);
@@ -125,8 +123,7 @@ class authHandler
                 "expire"=>$expiration_time,
                 "data"=>array(
                     "user_id"=>$decoded->data->user_id,
-                    "type"=>$decoded->data->type,
-                    "enable"=>$decoded->data->enable
+                    "type"=>$decoded->data->type
                 )
             );
             return $this->createMessageToClient(200,"ok",JWT::encode($payload,keys));

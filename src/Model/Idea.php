@@ -5,7 +5,7 @@ class Idea
 {
     protected static function findAllIdeas() {
         // find all ideas of all students
-        $statement = "SELECT * FROM IDEAS;";
+        $statement = "SELECT * FROM `ideas`;";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->query($statement);
@@ -18,7 +18,7 @@ class Idea
 
     protected static function findAllIdeasOfAUser($id) {
         // find all ideas of a user with ID $id
-        $statement = "SELECT * FROM IDEAS WHERE ownerId='$id';";
+        $statement = "SELECT * FROM `ideas` WHERE `ownerId`='$id';";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->query($statement);
@@ -32,7 +32,7 @@ class Idea
 
     protected static function findIdea($id) {
         // find an specific idea of a user
-        $statement = "SELECT * FROM IDEAS WHERE idea_id=?;";
+        $statement = "SELECT * FROM `ideas` WHERE `idea_id`=?;";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->prepare($statement);
@@ -47,7 +47,7 @@ class Idea
     protected static function insert(Array $input,$ownerId) {
 
         // insert an idea to databaseController
-        $statement = "INSERT INTO IDEAS (idea_name,ownerId,ideaStatus,description, extraResources)
+        $statement = "INSERT INTO `ideas` (`idea_name`,`ownerId`,`ideaStatus`,`description`, `extraResources`)
                     VALUES (:idea_name, :ownerId,:ideaStatus ,:description, :extraResources);";
         try {
             $db=new databaseController();
@@ -67,7 +67,7 @@ class Idea
 
     protected static function updateExpert($id, Array $input) {
         // update idea's data (EXPERT)
-        $statement = "UPDATE IDEAS SET 
+        $statement = "UPDATE `ideas` SET 
                       `expertId`= :expertId 
                       WHERE idea_id = $id;";
         try {
@@ -84,8 +84,8 @@ class Idea
 
     protected static function updateExtraResources($id, Array $input) {
         // update idea's data (EXTRA_RESOURCES)
-        $statement = "UPDATE IDEAS SET 
-                     extraResources= :extraResources
+        $statement = "UPDATE `ideas` SET 
+                     `extraResources`= :extraResources
                      WHERE idea_id = '$id';";
         try {
             $db=new databaseController();
@@ -101,8 +101,8 @@ class Idea
 
     protected static function updateStatus($id, Array $input) {
         // update idea's data (IDEA_STATUS)
-        $statement = "UPDATE IDEAS SET 
-                     ideaStatus= :ideaStatus
+        $statement = "UPDATE `ideas` SET 
+                     `ideaStatus`= :ideaStatus
                       WHERE idea_id = '$id';";
         try {
             $db=new databaseController();
@@ -119,8 +119,8 @@ class Idea
     protected static function  delete($id) {
         // delete a idea
         $statement = "
-            DELETE FROM IDEAS
-            WHERE idea_id = '$id';
+            DELETE FROM `ideas`
+            WHERE `idea_id` = '$id';
         ";
         try {
             $db=new databaseController();

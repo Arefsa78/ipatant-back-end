@@ -5,7 +5,7 @@ class Patent
 {
     protected static function findAllPatents() {
         // find all patents of all students
-        $statement = "SELECT * FROM PATENTS;";
+        $statement = "SELECT * FROM `patents`;";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->query($statement);
@@ -18,7 +18,7 @@ class Patent
 
     protected static function findAllPatentsOfAUser($id) {
         // find all patents of a user with ID $id
-        $statement = "SELECT * FROM PATENTS WHERE ownerId='$id';";
+        $statement = "SELECT * FROM `patents` WHERE `ownerId`='$id';";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->query($statement);
@@ -32,7 +32,7 @@ class Patent
 
     protected static function findPatent($id) {
         // find an specific patent of a user
-        $statement = "SELECT * FROM PATENTS WHERE patent_Id='$id';";
+        $statement = "SELECT * FROM `patents` WHERE `patent_Id`='$id';";
         try {
             $db=new databaseController();
             $statement= $db->getConnection()->query($statement);
@@ -47,7 +47,7 @@ class Patent
     protected static function insert(Array $input,$ownerId) {
 
         // insert a patent to databaseController
-        $statement = "INSERT INTO PATENTS (patent_name, ownerId, patentStatus, description, extraResources)
+        $statement = "INSERT INTO `patents` (`patent_name`, `ownerId`, `patentStatus`, `description`, `extraResources`)
                     VALUES (:patent_name ,:ownerId, :patentStatus, :description, :extraResources);";
         try {
             $db=new databaseController();
@@ -67,9 +67,9 @@ class Patent
 
     protected static function updateExpert($id, Array $input) {
         // update patent's data (EXPERT)
-        $statement = "UPDATE PATENTS SET 
-                     expertId= :expertId
-                     WHERE patent_id = '$id';";
+        $statement = "UPDATE `patents` SET 
+                     `expertId`= :expertId
+                     WHERE `patent_id` = '$id';";
         try {
             $db=new databaseController();
             $statement = $db->getConnection()->prepare($statement);
@@ -84,9 +84,9 @@ class Patent
 
     protected static function updateExtraResources($id, Array $input) {
         // update patent's data (EXTRA_RESOURCES)
-        $statement = "UPDATE PATENTS SET 
-                     extraResources= :extraResources
-                     WHERE patent_id = '$id';";
+        $statement = "UPDATE `patents` SET 
+                     `extraResources`= :extraResources
+                     WHERE `patent_id` = '$id';";
         try {
             $db=new databaseController();
             $statement = $db->getConnection()->prepare($statement);
@@ -101,9 +101,9 @@ class Patent
 
     protected static function updateStatus($id, Array $input) {
         // update patent's data (PATENT_STATUS)
-        $statement = "UPDATE PATENTS SET 
-                     patentStatus= :patentStatus
-                     WHERE patent_id = '$id';";
+        $statement = "UPDATE `patents` SET 
+                     `patentStatus`= :patentStatus
+                     WHERE `patent_id` = '$id';";
         try {
             $db=new databaseController();
             $statement = $db->getConnection()->prepare($statement);
@@ -119,8 +119,8 @@ class Patent
     protected static function delete($id) {
         // delete a patent
         $statement = "
-            DELETE FROM PATENTS
-            WHERE patent_id = '$id';
+            DELETE FROM `patents`
+            WHERE `patent_id` = '$id';
         ";
         try {
             $db=new databaseController();

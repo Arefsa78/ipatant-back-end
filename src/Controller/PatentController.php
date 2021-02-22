@@ -54,7 +54,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -68,7 +68,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -90,7 +90,7 @@ class PatentController  extends Patent {
         if (! $this->validatePatentForInsertion($input)) {
             return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         Patent::insert($input,$decoded->data->user_id);
         return $this->createMessageToClient(200,"ok","ok");
     }
@@ -105,7 +105,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validatePatentForUpdate($input)) {
             return $this->createMessageToClient(422,"invalid command!","invalid command!");
@@ -130,7 +130,7 @@ class PatentController  extends Patent {
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
+        if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         Patent::delete($id);
         return $this->createMessageToClient(200,"ok","ok");
     }

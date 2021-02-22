@@ -39,7 +39,7 @@ class User {
             $db=new databaseController();
             $statement = $db->getConnection()->prepare($statement);
             $statement->execute(array($id));
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $result = $statement->fetch(\PDO::FETCH_ASSOC);
             return $result;
         } catch (\PDOException $e) {
             exit($e->getMessage());
@@ -77,7 +77,7 @@ class User {
 
         // insert a user to databaseController
         $db=new databaseController();
-        $statement = "INSERT INTO USERS (phoneNum, password,fullname)
+        $statement = "INSERT INTO `users` (`phoneNum`, `password`,`fullname`)
                     VALUES (:phoneNum, :password,:fullname);";
         try {
             $input["password"]=password_hash($db->makeSafe($input["password"]),PASSWORD_DEFAULT);
@@ -95,11 +95,11 @@ class User {
 
     protected static function findAll() {
         // find all users
-        $statement = "SELECT * FROM USERS;";
+        $statement = "SELECT * FROM `users`;";
         try {
             $db= new databaseController();
             $statement= $db->getConnection()->query($statement);
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $result = $statement->fetch(\PDO::FETCH_ASSOC);
 
             return $result;
         } catch (\PDOException $e) {
@@ -124,7 +124,7 @@ class User {
     protected static function delete($id) {
         // delete a user
         $statement = "
-            DELETE FROM USERS
+            DELETE FROM `users`
             WHERE accountId = '$id';
         ";
         try {
@@ -133,6 +133,54 @@ class User {
             //$statement->execute(array('accountId' => $id));
         } catch (\PDOException $e) {
             exit($e->getMessage());
+        }
+    }
+
+    public static function isEnabled($id){
+        $result=User::findUser($id);
+        if($result["enabled"]==0) return false;
+        return true;
+    }
+
+    protected static function hasUserWithEmail($email){
+        $query="SELECT * FROM `users` WHERE `email`=?";
+        $db=new databaseController();
+        $statement=$db->getConnection()->prepare($query);
+        $statement->bind_param("s",$email);
+        $statement->execute();
+        $result=$statement->get_result();
+        if($result->num_rows>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    protected static function hasUserWithPhoneNumber($phoneNumber){
+        $query="SELECT * FROM `users` WHERE `phoneNum`=?";
+        $db=new databaseController();
+        $statement=$db->getConnection()->prepare($query);
+        $statement->bind_param("s",$phoneNumber);
+        $statement->execute();
+        $result=$statement->get_result();
+        if($result->num_rows>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    protected static function hasUserWithNationalCode($nationalCode){
+        $query="SELECT * FROM `users` WHERE `phoneNum`=?";
+        $db=new databaseController();
+        $statement=$db->getConnection()->prepare($query);
+        $statement->bind_param("s",$nationalCode);
+        $statement->execute();
+        $result=$statement->get_result();
+        if($result->num_rows>0){
+            return true;
+        }else{
+            return false;
         }
     }
 

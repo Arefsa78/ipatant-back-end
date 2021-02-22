@@ -27,7 +27,7 @@ class UserController  extends User{
                 $response = $this->createUserFromRequest();
                 break;
             case 'PUT':
-                $response = $this->updateUserFromRequest($this->userId);
+                $response = $this->updateUserFromRequest();
                 break;
             case 'DELETE':
                 $response = $this->deleteUser($this->userId);
@@ -62,7 +62,6 @@ class UserController  extends User{
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         return $this->createMessageToClient(200,"ok",$result);
     }
 
@@ -80,21 +79,23 @@ class UserController  extends User{
 
 
 
-    private function updateUserFromRequest($id) {
-        $result = User::findUser($id);
+    private function updateUserFromRequest() {
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        $result = User::findUser($decoded->data->user_id);
         if (! $result) {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
-        $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validateUserForUpdate($input)) {
-            return $this->createMessageToClient(404,"not found!","not found!");
+
+        $x=$this->validateUserForUpdate($input);
+        if (is_array($x)) {
+            return $x;
         }
-        User::update($id, $input);
+        User::update($decoded->data->user_id, $input);
         return $this->createMessageToClient(200,"ok","ok");
     }
 
@@ -111,7 +112,6 @@ class UserController  extends User{
         if (! $result) {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
-        if($decoded->data->enable==0) return $this->createMessageToClient(403,"access denied!","access denied!");
         PatentController::deleteAllPatentOfUser($id);
         IdeaController::deleteAllIdeasOfUser($id);
         User::delete($id);
@@ -121,24 +121,26 @@ class UserController  extends User{
 
     private function validateUserForUpdate($input){
         if(!isset($input['email']) || !isset($input['nationalCode']) || !isset($input['address'])
-        || !isset($input['residence']) || !isset($input['schoolName']) ){
-            return false;
+            || !isset($input['residence']) || !isset($input['schoolName']) ){
+            return $this->createMessageToClient(422,"invalid input!","invalid input!");
+        }
+        if(User::hasUserWithEmail($input["email"])){
+            return $this->createMessageToClient(401,"invalid email!","این پست الکترونیکی قبلا ثبت شده است!");
+        }
+        if(User::hasUserWithNationalCode($input["nationalCode"])){
+            return $this->createMessageToClient(401,"invalid email!","این کد ملی قبلا ثبت شده است!");
         }
         return true;
     }
 
 
     private function validateUserForRegister($input) {
-        if (! isset($input['phoneNum'])) {
-            return false;
+        if (! isset($input['phoneNum']) || ! isset($input['fullname']) || ! isset($input['password'])) {
+            return $this->createMessageToClient(403,"invalid command!","invalid input!");
         }
-        if (! isset($input['password'])) {
-            return false;
+        if(User::hasUserWithPhoneNumber($input["phoneNum"])){
+            return $this->createMessageToClient(401,"invalid phone!","این شماره تلفن قبلا ثبت شده است!");
         }
-        if (! isset($input['fullname'])) {
-            return false;
-        }
-
         return true;
     }
 
