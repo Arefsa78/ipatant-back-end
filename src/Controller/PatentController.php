@@ -51,7 +51,7 @@ class PatentController  extends Patent {
 
         $decoded=authHandler::validateToken();
         if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
-        if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
+        if($decoded->data->type=="Student" && $result["ownerId"]!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
