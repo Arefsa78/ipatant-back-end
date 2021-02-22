@@ -3,14 +3,28 @@ require_once("../Controller/databaseController.php");
 
 class User {
     private $userId;
-    private $authenticated;
     private $enabled;
     private $type;
-    public function __construct($userId,$type,$enabled,$authenticated) {
+    public function __construct($userId,$type,$enabled) {
         $this->userId=$userId;
         $this->type=$type;
         $this->enabled=$enabled;
-        $this->authenticated=$authenticated;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
 

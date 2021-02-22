@@ -1,19 +1,18 @@
 <?php
 require_once ("../Model/User.php");
 require_once("../Model/Idea.php");
+require_once ("authHandler.php");
 header("Content-Type: application/json; charset=UTF-8");
 
-class IdeaController {
+class IdeaController extends Idea {
 
     private $requestMethod;
     private $ideaId;
     private $ownerId;
-    private $currentUser;
-    public function __construct($requestMethod,$ownerId=null,$ideaId=null,$currentUser=null) {
+    public function __construct($requestMethod,$ownerId=null,$ideaId=null) {
         $this->requestMethod = $requestMethod;
         $this->ownerId=$ownerId;
         $this->ideaId=$ideaId;
-        $this->currentUser=$currentUser;
     }
 
     public function processRequest() {
@@ -38,76 +37,75 @@ class IdeaController {
                 $response = $this->deleteIdea($this->ideaId);
                 break;
             default:
-                $response = $this->notFoundResponse();
+                $response = $this->createMessageToClient(404,"not found!","not found!");
                 break;
         }
-        header($response['status_code_header']);
-        if($response['body']) {
-            echo $response['body'];
-        }
+        header($response["header"]);
+        echo json_encode($response["body"],JSON_UNESCAPED_UNICODE );
     }
 
     private function getIdea($id) {
-        $result = $this->findIdea($id);
+        $result = Idea::findIdea($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
-        if($this->currentUser->getType()=="Student" && $result["ownerId"]!=$this->currentUser->getUserId()){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
+           return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+        return $this->createMessageToClient(200,"ok",$result);
     }
 
     private function getAllIdeasOfAUser($id) {
-        $result = $this->findAllIdeasOfAUser($id);
+        $result = Idea::findAllIdeasOfAUser($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
-        if($this->currentUser->getType()=="Student" && $id!=$this->currentUser->getUserId()){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+         return $this->createMessageToClient(200,"ok",$result);
     }
 
     private function getAllIdeas() {
-        if($this->currentUser->getType()=="Student"){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student"){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        if($this->currentUser->getType()=="Student"){
-            return $this->unprocessableEntityResponse();
-        }
-        $result = $this->findAllIdeas();
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+        $result = Idea::findAllIdeas();
+        return $this->createMessageToClient(200,"ok",$result);
     }
 
 
     private function createIdeaFromRequest() {
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validateIdeaForInsertion($input)) {
-            return $this->unprocessableEntityResponse();
+            return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
-        $this->insert($input);
-        $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = null;
-        return $response;
+        Idea::insert($input);
+        return $this->createMessageToClient(201,"ok","created!");
     }
 
     private function updateIdeaFromRequest($id) {
-        $result = $this->findIdea($id);
+        $result = Idea::findIdea($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
+        }
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validateIdeaForUpdation($input)) {
-            return $this->unprocessableEntityResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
-
         if(array_key_exists ( 'expertId' ,  $input )) {
             $this->updateExpert($id, $input);
         } else if(array_key_exists ( 'extraResources' ,  $input )) {
@@ -115,23 +113,21 @@ class IdeaController {
         } else if(array_key_exists ( 'ideaStatus' ,  $input )) {
             $this->updateStatus($id, $input);
         }
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
-        return $response;
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
     private function deleteIdea($id) {
-        $result = $this->findIdea($id);
+        $result = Idea::findIdea($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
-        if($this->currentUser->getType()=="Student" && $result["ownerId"]!=$this->currentUser->getUserId()){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        $this->delete($id);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
-        return $response;
+        Idea::delete($id);
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
     public static function deleteAllIdeasOfUser($id){
@@ -161,19 +157,9 @@ class IdeaController {
         return false;
     }
 
-    private function unprocessableEntityResponse()
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
+    private function createMessageToClient($httpCode,$headerMessage,$body){
+        $response["header"]="HTTP/1.1 ".$httpCode." ".$headerMessage;
+        $response["body"]=$body;
         return $response;
     }
-
-    private function notFoundResponse() {
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
-        return $response;
-    }
-
 }

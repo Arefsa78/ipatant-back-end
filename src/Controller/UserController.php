@@ -3,6 +3,7 @@ require_once ("databaseController.php");
 require_once ("PatentController.php");
 require_once ("IdeaController.php");
 require_once ("../Model/User.php");
+require_once ("authHandler.php");
 header("Content-Type: application/json; charset=UTF-8");
 
 class UserController  extends User{
@@ -37,23 +38,16 @@ class UserController  extends User{
                 $response = $this->notFoundResponse();
                 break;
         }
-        header($response['status_code_header']);
-        if($response['body']) {
-            echo $response['body'];
-        }
+        header($response['header']);
+        echo json_encode($response["body"],JSON_UNESCAPED_UNICODE );
     }
 
     private function getAllUsers() {
         if($this->currentUser->getType()=="Student"){
-            return $this->unprocessableEntityResponse();
-        }
-        if($this->currentUser->getType()=="Student"){
-            return $this->unprocessableEntityResponse();
+            return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
         $result = User::findAll();
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
 
@@ -61,14 +55,14 @@ class UserController  extends User{
     private function getUser($id) {
         $result = User::findUser($id);
         if (! $result) {
-            return $this->notFoundResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
-        if($this->currentUser->getType()=="Student" && $id!=$this->currentUser->getUserId()){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
 
@@ -76,12 +70,10 @@ class UserController  extends User{
     private function createUserFromRequest() {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validateUserForRegister($input)) {
-            return $this->unprocessableEntityResponse();
+            return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
         $this->insert($input);
-        $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = null;
-        return $response;
+        return $this->createMessageToClient(201,"ok","created!");
     }
 
 
@@ -92,25 +84,27 @@ class UserController  extends User{
         if (! $result) {
             return $this->notFoundResponse();
         }
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
+        }
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         if (! $this->validateUserForUpdate($input)) {
-            return $this->unprocessableEntityResponse();
+            return $this->createMessageToClient(404,"not found!","not found!");
         }
         User::update($id, $input);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
-        $user=$this->loadUserFromSession();
-        $user->setEnabled(true);
-        $this->saveUserObjectInSession($user);
-        return $response;
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
 
 
 
     private function deleteUser($id) {
-        if($this->currentUser->getType()=="Student"){
-            return $this->unprocessableEntityResponse();
+        $decoded=authHandler::validateToken();
+        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded->data->type=="Student"){
+            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         $result = User::findUser($id);
         if (! $result) {
@@ -119,9 +113,7 @@ class UserController  extends User{
         PatentController::deleteAllPatentOfUser($id);
         IdeaController::deleteAllIdeasOfUser($id);
         User::delete($id);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
-        return $response;
+        return $this->createMessageToClient(200,"ok","ok");
     }
 
 
@@ -179,5 +171,13 @@ class UserController  extends User{
         $response['body'] = null;
         return $response;
     }
+
+    private function createMessageToClient($httpCode,$headerMessage,$body){
+        $response["header"]="HTTP/1.1 ".$httpCode." ".$headerMessage;
+        $response["body"]=$body;
+        return $response;
+    }
+
+
 }
 
