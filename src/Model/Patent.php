@@ -32,10 +32,10 @@ class Patent
 
     protected static function findPatent($id) {
         // find an specific patent of a user
-        $statement = "SELECT * FROM `patents` WHERE `patent_Id`='$id';";
+        $statement = "SELECT * FROM `patents` WHERE `patent_id`='$id';";
         try {
             $db=new databaseController();
-            $statement= $db->getConnection()->query($statement);
+            $statement= $db->getConnection()->prepare($statement);
             $statement->execute();
             $result = $statement->fetch(\PDO::FETCH_ASSOC);
             return $result;

@@ -34,21 +34,25 @@ if($uri[5]=="User"){
 }
 if($uri[5]=="Idea"){
     if(!isset($queries["type"])){
-        $controller=new IdeaController($requestedMethod);
+        if(isset($uri[6]))
+        $controller=new IdeaController($requestedMethod,null,$uri[6]);
+        else $controller=new IdeaController($requestedMethod);
+
     }
     else{
-        if($queries["type"]=="owner") $controller=new IdeaController($requestedMethod,$queries["owner"]);
-        elseif($queries["type"]=="idea") $controller=new IdeaController($requestedMethod,null,$queries["idea"]);
+        if($queries["type"]=="owner" && isset($uri[6]) ) $controller=new IdeaController($requestedMethod,$uri[6]);
+        elseif($queries["type"]=="idea" && isset($uri[6])) $controller=new IdeaController($requestedMethod,null,$uri[6]);
     }
 
 }
 if ($uri[5]=="Patent"){
     if(!isset($queries["type"])){
-        $controller=new PatentController($requestedMethod);
+        if(isset($uri[6]))$controller=new PatentController($requestedMethod,$uri[6]);
+        else $controller=new PatentController($requestedMethod);
     }
     else{
-        if($queries["type"]=="owner") $controller=new PatentController($requestedMethod,$queries["owner"]);
-        elseif($queries["type"]=="patent") $controller=new PatentController($requestedMethod,null,$queries["patent"]);
+        if($queries["type"]=="owner" && isset($uri[6])) $controller=new PatentController($requestedMethod,null,$uri[6]);
+        elseif($queries["type"]=="patent" && isset($uri[6])) $controller=new PatentController($requestedMethod,$uri[6],null);
     }
 }
 if($uri[5]=="auth"){

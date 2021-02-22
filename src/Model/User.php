@@ -114,7 +114,9 @@ class User {
             $statement = $db->getConnection()->prepare($statement);
             $statement->execute();
             $result=$statement->fetch(PDO::FETCH_ASSOC);
-            if(count($result)==0) return null;
+            if(!is_bool($result))
+                if(count($result)==0)
+                    return null;
             return ($result);
         }catch (\PDOException $e){
             exit($e->getMessage());
@@ -143,13 +145,12 @@ class User {
     }
 
     protected static function hasUserWithEmail($email){
-        $query="SELECT * FROM `users` WHERE `email`=?";
+        $query="SELECT * FROM `users` WHERE `email` = :email";
         $db=new databaseController();
         $statement=$db->getConnection()->prepare($query);
-        $statement->bind_param("s",$email);
-        $statement->execute();
-        $result=$statement->get_result();
-        if($result->num_rows>0){
+        $statement->execute([':email'=> $email]);
+        $result=$statement->rowCount();
+        if($result>0){
             return true;
         }else{
             return false;
@@ -157,13 +158,12 @@ class User {
     }
 
     protected static function hasUserWithPhoneNumber($phoneNumber){
-        $query="SELECT * FROM `users` WHERE `phoneNum`=?";
+        $query="SELECT * FROM `users` WHERE `phoneNum` = :phoneNum";
         $db=new databaseController();
         $statement=$db->getConnection()->prepare($query);
-        $statement->bind_param("s",$phoneNumber);
-        $statement->execute();
-        $result=$statement->get_result();
-        if($result->num_rows>0){
+        $statement->execute([':phoneNum'=> $phoneNumber]);
+        $result=$statement->rowCount();
+        if($result>0){
             return true;
         }else{
             return false;
@@ -171,13 +171,12 @@ class User {
     }
 
     protected static function hasUserWithNationalCode($nationalCode){
-        $query="SELECT * FROM `users` WHERE `phoneNum`=?";
+        $query="SELECT * FROM `users` WHERE `nationalCode` = :nationalCode ";
         $db=new databaseController();
         $statement=$db->getConnection()->prepare($query);
-        $statement->bind_param("s",$nationalCode);
-        $statement->execute();
-        $result=$statement->get_result();
-        if($result->num_rows>0){
+        $statement->execute([":nationalCode"=> $nationalCode]);
+        $result=$statement->rowCount();
+        if($result>0){
             return true;
         }else{
             return false;

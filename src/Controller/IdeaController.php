@@ -50,7 +50,7 @@ class IdeaController extends Idea {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
            return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -64,7 +64,7 @@ class IdeaController extends Idea {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -74,7 +74,7 @@ class IdeaController extends Idea {
 
     private function getAllIdeas() {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student"){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -87,8 +87,9 @@ class IdeaController extends Idea {
         $decoded=authHandler::validateToken();
         if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validateIdeaForInsertion($input)) {
-            return $this->createMessageToClient(422,"invalid command!","invalid command!");
+        $x=$this->validateIdeaForInsertion($input);
+        if (is_array($x)) {
+            return $x;
         }
         echo User::isEnabled($decoded->data->user_id);
         if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
@@ -102,14 +103,15 @@ class IdeaController extends Idea {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validateIdeaForUpdation($input)) {
-            return $this->createMessageToClient(404,"not found!","not found!");
+        $x=$this->validateIdeaForUpdation($input);
+        if (is_array($x)) {
+            return $x;
         }
         if(array_key_exists ( 'expertId' ,  $input )) {
             $this->updateExpert($id, $input);
@@ -127,7 +129,7 @@ class IdeaController extends Idea {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -154,13 +156,13 @@ class IdeaController extends Idea {
     private function validateIdeaForInsertion($input) {
         if (!isset($input['idea_name'])  || !isset($input["description"])
         || !isset($input["extraResources"]) ) {
-            return false;
+            return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
         return true;
     }
     private function validateIdeaForUpdation($input){
         if(isset($input["expertId"])|| isset($input["extraResources"])|| isset($input["ideaStatus"])) return true;
-        return false;
+        return $this->createMessageToClient(422,"invalid command!","invalid command!");
     }
 
     private function createMessageToClient($httpCode,$headerMessage,$body){

@@ -42,7 +42,7 @@ class UserController  extends User{
 
     private function getAllUsers() {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!" || $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student"){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -58,7 +58,7 @@ class UserController  extends User{
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["accountId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -69,8 +69,9 @@ class UserController  extends User{
 
     private function createUserFromRequest() {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validateUserForRegister($input)) {
-            return $this->createMessageToClient(422,"invalid command!","invalid command!");
+        $x=$this->validateUserForRegister($input);
+        if (is_array($x)) {
+            return $x;
         }
         $this->insert($input);
         return $this->createMessageToClient(201,"ok","created!");
@@ -81,7 +82,7 @@ class UserController  extends User{
 
     private function updateUserFromRequest() {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         $result = User::findUser($decoded->data->user_id);
         if (! $result) {
             return $this->createMessageToClient(404,"not found!","not found!");
@@ -90,7 +91,6 @@ class UserController  extends User{
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-
         $x=$this->validateUserForUpdate($input);
         if (is_array($x)) {
             return $x;
@@ -104,7 +104,7 @@ class UserController  extends User{
 
     private function deleteUser($id) {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student"){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }

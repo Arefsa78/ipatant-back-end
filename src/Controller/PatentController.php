@@ -9,7 +9,7 @@ class PatentController  extends Patent {
     private $requestMethod;
     private $patentId;
     private $ownerId;
-    public function __construct($requestMethod, $patentId=null, $ownerId=null,$currentUser=null) {
+    public function __construct($requestMethod, $patentId=null, $ownerId=null) {
         $this->requestMethod = $requestMethod;
         $this->patentId = $patentId;
         $this->ownerId = $ownerId;
@@ -50,7 +50,7 @@ class PatentController  extends Patent {
         }
 
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -64,7 +64,7 @@ class PatentController  extends Patent {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $id!=$decoded->data->user_id){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -74,7 +74,7 @@ class PatentController  extends Patent {
 
     private function getAllPatents() {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student"){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -85,10 +85,11 @@ class PatentController  extends Patent {
 
     private function createPatentFromRequest() {
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!" || $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validatePatentForInsertion($input)) {
-            return $this->createMessageToClient(422,"invalid command!","invalid command!");
+        $x= $this->validatePatentForInsertion($input);
+        if (is_array($x)) {
+            return $x;
         }
         if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         Patent::insert($input,$decoded->data->user_id);
@@ -101,14 +102,15 @@ class PatentController  extends Patent {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
         if(!User::isEnabled($decoded->data->user_id)) return $this->createMessageToClient(403,"access denied!","access denied!");
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validatePatentForUpdate($input)) {
-            return $this->createMessageToClient(422,"invalid command!","invalid command!");
+        $x=$this->validatePatentForUpdate($input);
+        if (is_array($x)) {
+            return $x;
         }
         if(array_key_exists ( 'expertId' ,  $input )) {
             Patent::updateExpert($id, $input);
@@ -126,7 +128,7 @@ class PatentController  extends Patent {
             return $this->createMessageToClient(404,"not found!","not found!");
         }
         $decoded=authHandler::validateToken();
-        if($decoded=="invalid token!" || $decoded=="expired token!") return $this->createMessageToClient("403","access denied!",$decoded);
+        if($decoded=="invalid token!" || $decoded=="expired token!"|| $decoded=="access denied!") return $this->createMessageToClient("403","access denied!",$decoded);
         if($decoded->data->type=="Student" && $decoded->data->user_id!= $result["ownerId"]){
             return $this->createMessageToClient(403,"access denied!","access denied!");
         }
@@ -136,14 +138,14 @@ class PatentController  extends Patent {
     }
 
     private function validatePatentForInsertion($input) {
-        if (!isset($input['patent_name']) || !isset($input['ownerId']) || !isset($input["extraResources"])) {
-            return false;
+        if (!isset($input['patent_name'])  || !isset($input["extraResources"]) || !isset($input["description"])) {
+            return $this->createMessageToClient(422,"invalid command!","invalid command!");
         }
         return true;
     }
     private function validatePatentForUpdate($input){
         if(isset($input["expertId"]) || isset($input["extraResources"]) || isset($input["patentStatus"])) return true;
-        return false;
+        return $this->createMessageToClient(422,"invalid command!","invalid command!");
     }
 
     public static function deleteAllPatentOfUser($id){
