@@ -70,6 +70,7 @@ if($uri[5]=="authAdmin"){
 if($uri[5]=="authAssistant"){
     $controller=new authHandler("GET","Assistant",null);
 }
+if(is_null($controller)) die("unproccessable request!");
 $controller->processRequest();
 
 
