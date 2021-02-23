@@ -1,4 +1,5 @@
 <?php
+require_once ("../authDB.php");
 
 function updateBlackList(){
     $now=time();
@@ -7,16 +8,16 @@ function updateBlackList(){
     $db->getConnection()->query($sql);
 }
 
-function updateUserList(){
-    $db=new databaseController();
-    $sql="DELETE FROM `user` WHERE `status`='0'";
-    $db->getConnection()->query($sql);
-}
+//function updateUserList(){
+//    $db=new databaseController();
+//    $sql="DELETE FROM `user` WHERE `status`='0'";
+//    $db->getConnection()->query($sql);
+//}
 
 
 
 updateBlackList();
-updateUserList();
+//updateUserList();
 
 
 
