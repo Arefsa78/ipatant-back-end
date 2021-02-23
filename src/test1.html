@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script>
+        let obj={
+            fullname: "alireza eiji",
+            password: "alirezaeiji",
+            phoneNum:"09127760629"
+        };
+
+        let jsonObj=JSON.stringify(obj)
+        let xmlHttp= new XMLHttpRequest();
+
+        xmlHttp.onreadystatechange=function (){
+            if(this.readyState==4){
+                alert(this.responseText)
+            }
+        };
+
+        xmlHttp.open("POST","http://localhost/EnergyProject/src/Controller/mainController.php/User",false);
+        xmlHttp.send(jsonObj)
+
+
+    </script>
+
+</body>
+</html>
