@@ -35,15 +35,11 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 $requestedMethod = $_SERVER["REQUEST_METHOD"];
 
-print_r($uri);
 
-print_r($requestedMethod);
+$controller=null;
 if($uri[5]=="User"){
-     $controller=null;
      if(!isset($uri[6])) $controller=new UserController($requestedMethod);
-     echo "the object created!";
-//    else $controller=new UserController($requestedMethod,$uri[6]);
-     $controller->processRequest();
+     else $controller=new UserController($requestedMethod,$uri[6]);
 }
 //if($uri[5]=="Idea"){
 //    if(!isset($queries["type"])){
@@ -84,7 +80,7 @@ if($uri[5]=="User"){
 //    $controller=new authHandler("GET","Assistant",null);
 //}
 //if(is_null($controller)) die("unproccessable request!");
-//$controller->processRequest();
+$controller->processRequest();
 
 
 
