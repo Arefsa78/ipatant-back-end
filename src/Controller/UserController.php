@@ -73,7 +73,7 @@ class UserController  extends User{
         if (is_array($x)) {
             return $x;
         }
-        $this->insert($input);
+        User::insert($input);
         return $this->createMessageToClient(201,"ok","created!");
     }
 
