@@ -38,12 +38,13 @@ $requestedMethod = $_SERVER["REQUEST_METHOD"];
 print_r($uri);
 
 print_r($requestedMethod);
-//if($uri[5]=="User"){
+if($uri[5]=="User"){
+    echo "hello aref ares!";
 //    $controller=null;
 //    if(!isset($uri[6])) $controller=new UserController($requestedMethod);
 //    else $controller=new UserController($requestedMethod,$uri[6]);
 //    $controller->processRequest();
-//}
+}
 //if($uri[5]=="Idea"){
 //    if(!isset($queries["type"])){
 //        if(isset($uri[6]))
