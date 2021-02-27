@@ -43,7 +43,7 @@ if($uri[5]=="User"){
      if(!isset($uri[6])) $controller=new UserController($requestedMethod);
      echo "the object created!";
 //    else $controller=new UserController($requestedMethod,$uri[6]);
-//    $controller->processRequest();
+     $controller->processRequest();
 }
 //if($uri[5]=="Idea"){
 //    if(!isset($queries["type"])){
