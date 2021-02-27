@@ -41,45 +41,45 @@ if($uri[5]=="User"){
      if(!isset($uri[6])) $controller=new UserController($requestedMethod);
      else $controller=new UserController($requestedMethod,$uri[6]);
 }
-//if($uri[5]=="Idea"){
-//    if(!isset($queries["type"])){
-//        if(isset($uri[6]))
-//        $controller=new IdeaController($requestedMethod,null,$uri[6]);
-//        else $controller=new IdeaController($requestedMethod);
-//
-//    }
-//    else{
-//        if($queries["type"]=="owner" && isset($uri[6]) ) $controller=new IdeaController($requestedMethod,$uri[6]);
-//        elseif($queries["type"]=="idea" && isset($uri[6])) $controller=new IdeaController($requestedMethod,null,$uri[6]);
-//    }
-//
-//}
-//if ($uri[5]=="Patent"){
-//    if(!isset($queries["type"])){
-//        if(isset($uri[6]))$controller=new PatentController($requestedMethod,$uri[6]);
-//        else $controller=new PatentController($requestedMethod);
-//    }
-//    else{
-//        if($queries["type"]=="owner" && isset($uri[6])) $controller=new PatentController($requestedMethod,null,$uri[6]);
-//        elseif($queries["type"]=="patent" && isset($uri[6])) $controller=new PatentController($requestedMethod,$uri[6],null);
-//    }
-//}
-//if($uri[5]=="auth"){
-//    $controller=new loginController($requestedMethod);
-//}
-//if($uri[5]=="refresh"){
-//    $controller=new authHandler("GET",null,"zdf");
-//}
-//if($uri[5]=="authUser"){
-//    $controller=new authHandler("GET","User",null);
-//}
-//if($uri[5]=="authAdmin"){
-//    $controller=new authHandler("GET","Admin",null);
-//}
-//if($uri[5]=="authAssistant"){
-//    $controller=new authHandler("GET","Assistant",null);
-//}
-//if(is_null($controller)) die("unproccessable request!");
+if($uri[5]=="Idea"){
+    if(!isset($queries["type"])){
+        if(isset($uri[6]))
+        $controller=new IdeaController($requestedMethod,null,$uri[6]);
+        else $controller=new IdeaController($requestedMethod);
+
+    }
+    else{
+        if($queries["type"]=="owner" && isset($uri[6]) ) $controller=new IdeaController($requestedMethod,$uri[6]);
+        elseif($queries["type"]=="idea" && isset($uri[6])) $controller=new IdeaController($requestedMethod,null,$uri[6]);
+    }
+
+}
+if ($uri[5]=="Patent"){
+    if(!isset($queries["type"])){
+        if(isset($uri[6]))$controller=new PatentController($requestedMethod,$uri[6]);
+        else $controller=new PatentController($requestedMethod);
+    }
+    else{
+        if($queries["type"]=="owner" && isset($uri[6])) $controller=new PatentController($requestedMethod,null,$uri[6]);
+        elseif($queries["type"]=="patent" && isset($uri[6])) $controller=new PatentController($requestedMethod,$uri[6],null);
+    }
+}
+if($uri[5]=="auth"){
+    $controller=new loginController($requestedMethod);
+}
+if($uri[5]=="refresh"){
+    $controller=new authHandler("GET",null,"zdf");
+}
+if($uri[5]=="authUser"){
+    $controller=new authHandler("GET","User",null);
+}
+if($uri[5]=="authAdmin"){
+    $controller=new authHandler("GET","Admin",null);
+}
+if($uri[5]=="authAssistant"){
+    $controller=new authHandler("GET","Assistant",null);
+}
+if(is_null($controller)) die("unproccessable request!");
 $controller->processRequest();
 
 
