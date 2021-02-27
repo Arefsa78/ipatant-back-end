@@ -39,9 +39,12 @@ print_r($uri);
 
 print_r($requestedMethod);
 if($uri[5]=="User"){
-    echo "hello aref ares!";
-//    $controller=null;
-//    if(!isset($uri[6])) $controller=new UserController($requestedMethod);
+     echo "</br>";
+     $controller=null;
+     echo "reza";
+     echo "</br>";
+     if(!isset($uri[6])) $controller=new UserController($requestedMethod);
+
 //    else $controller=new UserController($requestedMethod,$uri[6]);
 //    $controller->processRequest();
 }
