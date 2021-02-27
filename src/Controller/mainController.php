@@ -35,7 +35,7 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 $requestedMethod = $_SERVER["REQUEST_METHOD"];
 
-print_r($uri );
+print_r($uri);
 
 print_r($requestedMethod);
 //if($uri[5]=="User"){
