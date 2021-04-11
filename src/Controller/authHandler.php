@@ -37,7 +37,7 @@ class authHandler
 
     public static function generateJwtAccessTokenForUser(User $user){
         $issued_at = time();
-        $expiration_time = $issued_at + (900);
+        $expiration_time = $issued_at + (1000000);
         $payload=array(
             "start"=>$issued_at,
             "expire"=>$expiration_time,
